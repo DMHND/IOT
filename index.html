@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Poultry Farm Temperature Monitor</title>
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      text-align: center;
+      padding: 60px;
+    }
+    h1 {
+      color: #333;
+    }
+    #temp {
+      font-size: 60px;
+      color: #e91e63;
+      margin-top: 20px;
+    }
+    .status {
+      margin-top: 20px;
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <h1>🐔 Poultry Farm Live Temperature</h1>
+  <div id="temp">Connecting...</div>
+  <div class="status" id="status">Waiting for MQTT...</div>
+
+  <script>
+    const broker = "wss://broker.hivemq.com:8884/mqtt";
+    const topic = "farm/temperature";
+
+    const client = mqtt.connect(broker);
+
+    client.on("connect", () => {
+      console.log("Connected to MQTT broker");
+      document.getElementById("status").innerText = "Connected to MQTT broker";
+      client.subscribe(topic, (err) => {
+        if (!err) {
+          console.log("Subscribed to topic:", topic);
+        }
+      });
+    });
+
+    client.on("message", (topic, message) => {
+      const temp = message.toString();
+      document.getElementById("temp").innerText = `${temp} °C`;
+      console.log("Received:", temp);
+    });
+
+    client.on("error", (err) => {
+      console.error("MQTT Error:", err);
+      document.getElementById("status").innerText = "MQTT connection error.";
+    });
+  </script>
+</body>
+</html>
